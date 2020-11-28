@@ -1,0 +1,114 @@
+diagram:
+  fill: "white"
+  rows: 7
+  columns: 9
+  gridLines: true
+  margins: {top: 20, right: 20, bottom: 50, left: 20 }
+title:
+  author: Masatoshi Tohna
+  company: oresama-lab.net
+  color: black
+  type: bar
+  stroke: black
+  logoFill: white
+  logoUrl: https://3.bp.blogspot.com/-8tO27OaQmKo/W1vhDEBgLMI/AAAAAAABNtc/WqKk_bLT1k0O2loY5VH5UeNp6ejZ3GBwQCLcBGAs/s800/character_earth_chikyu_internet.png
+  text: ◯◯システム 構成図
+  subText: Sample Diagram for AWS
+  version: 1.0.0
+iconDefaults: &iconDefaults
+  color: "black"
+  fill: "white"
+  stroke: "white"
+  iconFamily: aws
+  textLocation: bottomMiddle
+azureEnterprise: &azureEnterprise
+  color: "black"
+  fill: "white"
+  stroke: "white"
+  iconFamily: azureEnterprise
+  textLocation: bottomMiddle
+cisco: &cisco
+  stroke: "none"
+  color: "black"
+  iconFill: "darkslategrey"
+  iconStroke: "lightgrey"
+  iconStrokeWidth: .25
+  iconFamily: "cisco"
+  fill: "none"
+  preserveWhite: "true"
+cloud: &cloud
+  <<: *cisco
+  iconStroke: black
+  iconStrokeWidth: 5
+groupDefaults: &groupDefaults
+  fill: "none"
+  color: "black"
+  stroke: "black"
+connectionDefaults: &connectionDefaults
+  color: "Black"
+  stroke: "Black"
+  strokeWidth: 1
+connectionDashed: &connectionDashed
+  color: "Black"
+  stroke: "Black"
+  strokeWidth: 1
+  strokeDashArray: [3,3]
+noteDefaults: &noteDefaults
+  color: "black"
+  fill: "white"
+  stroke: "black"
+  xAlign: center
+  yAlign: center
+
+# grouping parameters
+group: &group
+  - { color: "black", stroke: "black", fill: "#EEEEEE", strokeWidth: .5, textLocation: leftMiddle }
+vpc: &vpc
+  - { <<: *group, fill: "#DDDDDD", strokeDashArray: [3,3] }
+hiddenGroup: &hiddenGroup
+  - { color: "none", stroke: "none", fill: "none" }
+
+# diagrams
+icons:
+  user: { <<: *azureEnterprise, text: ユーザー, icon: userenterprise, x: 1, y: 5 }
+  r53-1: { <<: *iconDefaults, text: prod.example.com, icon: Res_Amazon-Route-53-Hosted-Zone_48_Light, x: "+4", y: "+1" }
+  internet1: { <<: *cloud, icon: cloud, text: Internet, textLocation: center, x: "-3", y: "-1", w: 2, h: 1 }
+  igw1: { <<: *iconDefaults, text: IGW, icon: Res_Amazon-VPC_Internet-Gateway_48_Light, x: "+2" }
+  alb1: { <<: *iconDefaults, text: ALB, icon: Res_Elastic-Load-Balancing_Application-Load-Balancer_48_Light, x: "+1" }
+  s3: { <<: *iconDefaults, text: Sorry Page, icon: Res_Amazon-Simple-Storage_Bucket-With-Objects_48_Light, y: "-2" }
+  server1: { <<: *iconDefaults, text: 本番機_#1, icon: Res_Amazon-EC2_Instance_48_Light, x: "+1", y: "+2" }
+  db1:  { <<: *iconDefaults, text: DB(Master), icon: Res_Amazon-EC2_DB-Instance_48_Light, x: "+1" }
+  server2: { <<: *iconDefaults, text: 本番機_#2, icon: Res_Amazon-EC2_Instance_48_Light, x: "-1", y: "-1" }
+  db2:  { <<: *iconDefaults, text: DB(slave), icon: Res_Amazon-EC2_DB-Instance_48_Light, x: "+1" }
+
+  r53-2: { <<: *iconDefaults, text: dev.example.com, icon: Res_Amazon-Route-53-Hosted-Zone_48_Light, x: 5, y: 0 }
+  user2: { <<: *azureEnterprise, text: Administrator, icon: userpermissions, x: 1, y: 1 }
+  internet2: { <<: *cloud, icon: cloud, text: Internet, textLocation: center, x: "+1", w: 2, h: 1 }
+  igw2: { <<: *iconDefaults, text: IGW, icon: Res_Amazon-VPC_Internet-Gateway_48_Light, x: "+2" }
+  server3: { <<: *iconDefaults, text: 開発機, icon: Res_Amazon-EC2_Instance_48_Light, x: "+2" }
+  db3:  { <<: *iconDefaults, text: DB(Master), icon: Res_Amazon-EC2_DB-Instance_48_Light, x: "+1" }
+
+groups:
+  vpc1: { <<: *groupDefaults, name: VPC, members: [igw1, alb1, az1, az2] }
+  vpc2: { <<: *groupDefaults, name: VPC, members: [igw2, az3] }
+  az1: { <<: *groupDefaults, name: AZ-a, members: [server1, db1], textLocation: topLeft }
+  az2: { <<: *groupDefaults, name: AZ-c, members: [server2, db2], textLocation: bottomLeft }
+  az3: { <<: *groupDefaults, name: AZ-a, members: [server3, db3], textLocation: topLeft }
+connections:
+  - { <<: *connectionDefaults, curve: curveStepBefore, endpoints: [user, r53-1:名前解決] }
+  - { <<: *connectionDefaults, endpoints: [user, internet1] }
+  - { <<: *connectionDefaults, endpoints: [internet1, igw1] }
+  - { <<: *connectionDefaults, endpoints: [igw1, alb1] }
+  - { <<: *connectionDefaults, endpoints: [alb1, server1] }
+  - { <<: *connectionDefaults, endpoints: [alb1, server2] }
+  - { <<: *connectionDefaults, endpoints: [server1, db1] }
+  - { <<: *connectionDefaults, endpoints: [server2, db1] }
+  - { <<: *connectionDashed, endpoints: [server2, db2] }
+  - { <<: *connectionDashed, endpoints: [r53-1:ヘルスチェック, alb1] }
+  - { <<: *connectionDashed, curve: curveStepBefore, endpoints: [alb1, s3:フェールオーバー] }
+  - { <<: *connectionDefaults, endpoints: [user2, internet1] }
+  - { <<: *connectionDefaults, endpoints: [user2, internet2] }
+  - { <<: *connectionDefaults, curve: curveStepBefore, endpoints: [user2, r53-2] }
+  - { <<: *connectionDefaults, endpoints: [internet2, igw2] }
+  - { <<: *connectionDefaults, endpoints: [igw2, server3] }
+  - { <<: *connectionDefaults, endpoints: [server3, db3] }
