@@ -4,7 +4,7 @@
 ## How to use
 
 ⚠ | You need docker environment. If you don't have it, please read [docker official document](https://docs.docker.com/get-docker/) and install docker engine in your machine previously.
-:--: | --
+:--: | :--
 
 First, clone this repository on your machine. The command is below.
 
